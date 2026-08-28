@@ -12,6 +12,7 @@ import { DatePlPipe } from '../../shared/date-pl.pipe';
 import { PlnPipe } from '../../shared/pln.pipe';
 
 export type ResultView = 'unmatched' | 'probable' | 'exact';
+export type UnmatchedSource = 'all' | 'a' | 'b';
 
 @Component({
   selector: 'app-compare-result',
@@ -36,9 +37,25 @@ export class CompareResultComponent implements OnInit {
   readonly comparison = signal<Comparison | null>(null);
   readonly matches = signal<MatchRow[]>([]);
   readonly view = signal<ResultView>('unmatched');
+  readonly unmatchedSource = signal<UnmatchedSource>('all');
   readonly query = signal('');
   readonly amountFilter = signal('');
   readonly loading = signal(true);
+
+  readonly unmatchedEmptyMessage = computed(() => {
+    const current = this.comparison();
+    if (!current) {
+      return 'Brak wierszy.';
+    }
+    const source = this.unmatchedSource();
+    if (source === 'a') {
+      return `Brak wpisów z „${this.fileLabel(current.file_a.display_name)}”, których nie ma w „${this.fileLabel(current.file_b.display_name)}”.`;
+    }
+    if (source === 'b') {
+      return `Brak wpisów z „${this.fileLabel(current.file_b.display_name)}”, których nie ma w „${this.fileLabel(current.file_a.display_name)}”.`;
+    }
+    return 'Wszystkie wpisy mają odpowiednik w drugim pliku.';
+  });
 
   readonly unmatchedCount = computed(() => {
     const summary = this.comparison()?.summary;
@@ -50,6 +67,7 @@ export class CompareResultComponent implements OnInit {
 
   readonly visible = computed(() => {
     const view = this.view();
+    const unmatchedSource = this.unmatchedSource();
     const query = this.query().trim().toLowerCase();
     const amountRaw = this.amountFilter().trim().replace(',', '.');
     const amount = amountRaw ? Number(amountRaw).toFixed(2) : '';
@@ -57,7 +75,11 @@ export class CompareResultComponent implements OnInit {
     const rows = this.matches().filter((row) => {
       const inView =
         view === 'unmatched'
-          ? row.kind === 'unmatched_a' || row.kind === 'unmatched_b'
+          ? unmatchedSource === 'a'
+            ? row.kind === 'unmatched_a'
+            : unmatchedSource === 'b'
+              ? row.kind === 'unmatched_b'
+              : row.kind === 'unmatched_a' || row.kind === 'unmatched_b'
           : view === 'probable'
             ? row.kind === 'probable'
             : row.kind === 'exact';
@@ -90,6 +112,11 @@ export class CompareResultComponent implements OnInit {
 
   setView(view: ResultView): void {
     this.view.set(view);
+  }
+
+  showUnmatched(source: UnmatchedSource = 'all'): void {
+    this.unmatchedSource.set(source);
+    this.view.set('unmatched');
   }
 
   fileLabel(name: string): string {

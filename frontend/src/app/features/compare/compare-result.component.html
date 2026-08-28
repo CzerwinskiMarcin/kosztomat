@@ -20,7 +20,7 @@
       type="button"
       class="metric unmatched"
       [class.metric--active]="view() === 'unmatched'"
-      (click)="setView('unmatched')"
+      (click)="showUnmatched('all')"
     >
       <span>Brakujące</span>
       <strong>{{ unmatchedCount() }}</strong>
@@ -53,6 +53,37 @@
   </div>
 
   <div class="toolbar">
+    @if (view() === 'unmatched') {
+      <div class="source-filter" role="group" aria-label="Filtruj brakujące według pliku">
+        <button
+          type="button"
+          [class.active]="unmatchedSource() === 'all'"
+          (click)="showUnmatched('all')"
+        >
+          Oba pliki
+          <em>{{ unmatchedCount() }}</em>
+        </button>
+        <button
+          type="button"
+          [class.active]="unmatchedSource() === 'a'"
+          [title]="'Wpisy z ' + current.file_a.display_name + ', których nie ma w ' + current.file_b.display_name"
+          (click)="showUnmatched('a')"
+        >
+          Tylko {{ fileLabel(current.file_a.display_name) }}
+          <em>{{ current.summary.unmatched_a }}</em>
+        </button>
+        <button
+          type="button"
+          class="source-b"
+          [class.active]="unmatchedSource() === 'b'"
+          [title]="'Wpisy z ' + current.file_b.display_name + ', których nie ma w ' + current.file_a.display_name"
+          (click)="showUnmatched('b')"
+        >
+          Tylko {{ fileLabel(current.file_b.display_name) }}
+          <em>{{ current.summary.unmatched_b }}</em>
+        </button>
+      </div>
+    }
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>Szukaj w opisie</mat-label>
       <input matInput [ngModel]="query()" (ngModelChange)="query.set($event)" />
@@ -90,7 +121,7 @@
             }
           } @empty {
             <tr>
-              <td colspan="5" class="muted">Wszystkie wpisy mają odpowiednik w drugim pliku.</td>
+              <td colspan="5" class="muted">{{ unmatchedEmptyMessage() }}</td>
             </tr>
           }
         </tbody>

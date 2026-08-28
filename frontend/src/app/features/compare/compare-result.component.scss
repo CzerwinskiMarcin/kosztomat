@@ -110,11 +110,50 @@ a {
   display: flex;
   flex-wrap: wrap;
   gap: 0.65rem;
+  align-items: center;
   margin-bottom: 0.75rem;
 }
 
 .toolbar mat-form-field {
-  width: 16rem;
+  width: 14rem;
+}
+
+.source-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.source-filter button {
+  max-width: 16rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--kz-border);
+  background: var(--kz-surface);
+  color: var(--kz-text);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.source-filter button em {
+  font-style: normal;
+  color: var(--kz-muted);
+  margin-left: 0.25rem;
+}
+
+.source-filter button.active {
+  border-color: var(--kz-accent);
+  background: color-mix(in srgb, var(--kz-accent) 16%, transparent);
+  color: var(--kz-accent);
+}
+
+.source-filter button.source-b.active {
+  border-color: #93c5fd;
+  background: color-mix(in srgb, #93c5fd 16%, transparent);
+  color: #93c5fd;
 }
 
 .table-wrap {
