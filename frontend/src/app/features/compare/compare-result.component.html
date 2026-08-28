@@ -25,9 +25,11 @@
       <span>Brakujące</span>
       <strong>{{ unmatchedCount() }}</strong>
       <small>
-        {{ current.summary.unmatched_a }} w {{ fileLabel(current.file_a.display_name) }}
-        ·
-        {{ current.summary.unmatched_b }} w {{ fileLabel(current.file_b.display_name) }}
+        {{ unmatchedSum() | pln }}
+        · {{ current.summary.unmatched_a }} w {{ fileLabel(current.file_a.display_name) }}
+        ({{ unmatchedSumA() | pln }})
+        · {{ current.summary.unmatched_b }} w {{ fileLabel(current.file_b.display_name) }}
+        ({{ unmatchedSumB() | pln }})
       </small>
     </button>
     <button
@@ -61,7 +63,7 @@
           (click)="showUnmatched('all')"
         >
           Oba pliki
-          <em>{{ unmatchedCount() }}</em>
+          <em>{{ unmatchedCount() }} · {{ unmatchedSum() | pln }}</em>
         </button>
         <button
           type="button"
@@ -70,7 +72,7 @@
           (click)="showUnmatched('a')"
         >
           Tylko {{ fileLabel(current.file_a.display_name) }}
-          <em>{{ current.summary.unmatched_a }}</em>
+          <em>{{ current.summary.unmatched_a }} · {{ unmatchedSumA() | pln }}</em>
         </button>
         <button
           type="button"
@@ -80,7 +82,7 @@
           (click)="showUnmatched('b')"
         >
           Tylko {{ fileLabel(current.file_b.display_name) }}
-          <em>{{ current.summary.unmatched_b }}</em>
+          <em>{{ current.summary.unmatched_b }} · {{ unmatchedSumB() | pln }}</em>
         </button>
       </div>
     }
@@ -125,6 +127,14 @@
             </tr>
           }
         </tbody>
+        @if (visible().length) {
+          <tfoot>
+            <tr>
+              <td class="num">{{ visibleSum() | pln }}</td>
+              <td colspan="4">Suma {{ visible().length }} brakujących wpisów</td>
+            </tr>
+          </tfoot>
+        }
       </table>
     </div>
   } @else {

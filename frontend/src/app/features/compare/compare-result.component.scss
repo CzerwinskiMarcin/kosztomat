@@ -125,7 +125,7 @@ a {
 }
 
 .source-filter button {
-  max-width: 16rem;
+  max-width: 22rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -240,4 +240,11 @@ tr:last-child td {
 
 .muted {
   color: var(--kz-muted);
+}
+
+tfoot td {
+  border-bottom: 0;
+  border-top: 1px solid var(--kz-border);
+  background: color-mix(in srgb, var(--kz-bg) 45%, var(--kz-surface));
+  font-weight: 600;
 }

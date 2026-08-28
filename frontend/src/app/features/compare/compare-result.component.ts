@@ -65,6 +65,11 @@ export class CompareResultComponent implements OnInit {
     return summary.unmatched_a + summary.unmatched_b;
   });
 
+  readonly unmatchedSum = computed(() => this.sumByKind(['unmatched_a', 'unmatched_b']));
+  readonly unmatchedSumA = computed(() => this.sumByKind(['unmatched_a']));
+  readonly unmatchedSumB = computed(() => this.sumByKind(['unmatched_b']));
+  readonly visibleSum = computed(() => this.sumRows(this.visible()));
+
   readonly visible = computed(() => {
     const view = this.view();
     const unmatchedSource = this.unmatchedSource();
@@ -165,6 +170,15 @@ export class CompareResultComponent implements OnInit {
   }
 
   trackByMatch = (_index: number, row: MatchRow): number => row.id;
+
+  private sumByKind(kinds: MatchRow['kind'][]): string {
+    return this.sumRows(this.matches().filter((row) => kinds.includes(row.kind)));
+  }
+
+  private sumRows(rows: MatchRow[]): string {
+    const cents = rows.reduce((total, row) => total + Math.round(Number(row.amount) * 100), 0);
+    return (cents / 100).toFixed(2);
+  }
 
   private async load(id: number): Promise<void> {
     const [comparison, matches] = await Promise.all([
