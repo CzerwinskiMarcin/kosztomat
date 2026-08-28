@@ -14,7 +14,7 @@
   <form class="panel" (submit)="$event.preventDefault(); run()">
     <div class="grid">
       <mat-form-field appearance="outline">
-        <mat-label>Plik A</mat-label>
+        <mat-label>Pierwszy zestaw</mat-label>
         <mat-select [(ngModel)]="fileAId" name="fileA">
           @for (file of files(); track file.id) {
             <mat-option [value]="file.id">{{ file.display_name }}</mat-option>
@@ -22,7 +22,7 @@
         </mat-select>
       </mat-form-field>
       <mat-form-field appearance="outline">
-        <mat-label>Plik B</mat-label>
+        <mat-label>Porównaj z</mat-label>
         <mat-select [(ngModel)]="fileBId" name="fileB">
           @for (file of files(); track file.id) {
             <mat-option [value]="file.id">{{ file.display_name }}</mat-option>

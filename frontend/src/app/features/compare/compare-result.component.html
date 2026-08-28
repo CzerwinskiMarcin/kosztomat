@@ -1,8 +1,14 @@
 @if (comparison(); as current) {
   <section class="page-head">
     <div>
-      <h1>{{ current.file_a.display_name }} ↔ {{ current.file_b.display_name }}</h1>
-      <p>Tolerancja daty: {{ current.date_tolerance_days }} dni</p>
+      <a routerLink="/compare">← Porównania</a>
+      <h1>Czego brakuje</h1>
+      <p class="files-legend">
+        <span class="file-chip" [title]="current.file_a.display_name">{{ fileLabel(current.file_a.display_name) }}</span>
+        <span class="vs">vs</span>
+        <span class="file-chip file-chip--b" [title]="current.file_b.display_name">{{ fileLabel(current.file_b.display_name) }}</span>
+        <span class="hint">okno {{ current.date_tolerance_days }} dni</span>
+      </p>
     </div>
     <button mat-stroked-button type="button" (click)="rerun()" [disabled]="loading()">
       Porównaj ponownie
@@ -10,75 +16,126 @@
   </section>
 
   <div class="metrics" role="status">
-    <article>
-      <span>Dopasowane 100%</span>
-      <strong>{{ current.summary.exact }}</strong>
-    </article>
-    <article class="probable">
-      <span>Prawdopodobne 80%</span>
+    <button
+      type="button"
+      class="metric unmatched"
+      [class.metric--active]="view() === 'unmatched'"
+      (click)="setView('unmatched')"
+    >
+      <span>Brakujące</span>
+      <strong>{{ unmatchedCount() }}</strong>
+      <small>
+        {{ current.summary.unmatched_a }} w {{ fileLabel(current.file_a.display_name) }}
+        ·
+        {{ current.summary.unmatched_b }} w {{ fileLabel(current.file_b.display_name) }}
+      </small>
+    </button>
+    <button
+      type="button"
+      class="metric probable"
+      [class.metric--active]="view() === 'probable'"
+      (click)="setView('probable')"
+    >
+      <span>Prawie zgodne</span>
       <strong>{{ current.summary.probable }}</strong>
-    </article>
-    <article class="only-a">
-      <span>Tylko plik A</span>
-      <strong>{{ current.summary.unmatched_a }}</strong>
-    </article>
-    <article class="only-b">
-      <span>Tylko plik B</span>
-      <strong>{{ current.summary.unmatched_b }}</strong>
-    </article>
+      <small>ta sama kwota, inna data</small>
+    </button>
+    <button
+      type="button"
+      class="metric exact"
+      [class.metric--active]="view() === 'exact'"
+      (click)="setView('exact')"
+    >
+      <span>Zgodne</span>
+      <strong>{{ current.summary.exact }}</strong>
+      <small>kwota i data się zgadzają</small>
+    </button>
   </div>
 
   <div class="toolbar">
-    <mat-button-toggle-group [value]="kind()" (change)="setKind($event.value)">
-      <mat-button-toggle value="exact">Dopasowane 100%</mat-button-toggle>
-      <mat-button-toggle value="probable">Prawdopodobne 80%</mat-button-toggle>
-      <mat-button-toggle value="unmatched_a">Tylko plik A</mat-button-toggle>
-      <mat-button-toggle value="unmatched_b">Tylko plik B</mat-button-toggle>
-    </mat-button-toggle-group>
-    <mat-form-field appearance="outline">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>Szukaj w opisie</mat-label>
       <input matInput [ngModel]="query()" (ngModelChange)="query.set($event)" />
     </mat-form-field>
-    <mat-form-field appearance="outline">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>Kwota</mat-label>
       <input matInput [ngModel]="amountFilter()" (ngModelChange)="amountFilter.set($event)" />
     </mat-form-field>
   </div>
 
-  <div class="list">
-    @for (row of visible(); track trackByMatch($index, row)) {
-      <article class="pair" [attr.data-kind]="row.kind">
-        <div class="amount">
-          <span class="badge">{{ row.confidence }}%</span>
-          <strong>{{ row.amount | pln }}</strong>
-          @if (row.date_delta_days !== null && row.kind === 'probable') {
-            <em>Δ {{ row.date_delta_days }} dni</em>
+  @if (view() === 'unmatched') {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Kwota</th>
+            <th>Data</th>
+            <th>Opis</th>
+            <th>Jest w</th>
+            <th>Brakuje w</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of visible(); track trackByMatch($index, row)) {
+            @if (side(row); as item) {
+              <tr>
+                <td class="num">{{ row.amount | pln }}</td>
+                <td>{{ item.booking_date | datePl }}</td>
+                <td class="desc">{{ item.description || '—' }}</td>
+                <td>
+                  <span class="tag" [class.tag--b]="row.kind === 'unmatched_b'">{{ presentIn(row) }}</span>
+                </td>
+                <td class="missing">{{ missingFrom(row) }}</td>
+              </tr>
+            }
+          } @empty {
+            <tr>
+              <td colspan="5" class="muted">Wszystkie wpisy mają odpowiednik w drugim pliku.</td>
+            </tr>
           }
-        </div>
-        <div class="sides">
-          @if (row.a) {
-            <div>
-              <small>A · {{ current.file_a.display_name }}</small>
-              <p>{{ row.a.booking_date | datePl }}</p>
-              <p>{{ row.a.description || '—' }}</p>
-            </div>
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Kwota</th>
+            <th>{{ fileLabel(current.file_a.display_name) }}</th>
+            <th>{{ fileLabel(current.file_b.display_name) }}</th>
+            @if (view() === 'probable') {
+              <th>Różnica dat</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of visible(); track trackByMatch($index, row)) {
+            <tr>
+              <td class="num">{{ row.amount | pln }}</td>
+              <td>
+                <div class="cell">
+                  <span>{{ row.a?.booking_date | datePl }}</span>
+                  <small>{{ row.a?.description || '—' }}</small>
+                </div>
+              </td>
+              <td>
+                <div class="cell">
+                  <span>{{ row.b?.booking_date | datePl }}</span>
+                  <small>{{ row.b?.description || '—' }}</small>
+                </div>
+              </td>
+              @if (view() === 'probable') {
+                <td class="delta">Δ {{ row.date_delta_days }} dni</td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td [attr.colspan]="view() === 'probable' ? 4 : 3" class="muted">Brak wierszy w tej grupie.</td>
+            </tr>
           }
-          @if (row.b) {
-            <div>
-              <small>B · {{ current.file_b.display_name }}</small>
-              <p>{{ row.b.booking_date | datePl }}</p>
-              <p>{{ row.b.description || '—' }}</p>
-            </div>
-          }
-          @if (!row.a || !row.b) {
-            <div class="missing">
-              <small>Brak odpowiednika w drugim pliku</small>
-            </div>
-          }
-        </div>
-      </article>
-    } @empty {
-      <p class="muted">Brak wierszy w tej grupie.</p>
-    }
-  </div>
+        </tbody>
+      </table>
+    </div>
+  }
 }
