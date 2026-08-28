@@ -1,0 +1,47 @@
+@use '@angular/material' as mat;
+
+html {
+  color-scheme: dark;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$cyan-palette,
+        tertiary: mat.$spring-green-palette,
+      ),
+      typography: (
+        plain-family: 'DM Sans',
+        brand-family: 'DM Sans',
+      ),
+      density: 0,
+    )
+  );
+}
+
+:root {
+  --kz-bg: #0f1614;
+  --kz-surface: #18201d;
+  --kz-border: #2a3a35;
+  --kz-text: #e8f5f0;
+  --kz-muted: #9bb0a8;
+  --kz-accent: #2dd4bf;
+  --kz-accent-dim: #115e59;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: var(--kz-bg);
+  color: var(--kz-text);
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--kz-accent);
+  outline-offset: 2px;
+}
+
+button.mat-mdc-button-base,
+a.mat-mdc-button-base {
+  letter-spacing: 0.01em;
+}

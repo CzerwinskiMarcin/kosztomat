@@ -1,0 +1,32 @@
+<section class="page-head">
+  <div>
+    <h1>Pliki</h1>
+    <p>Przechowuj eksporty bankowe i budżetowe, potem porównuj dowolną parę.</p>
+  </div>
+</section>
+
+<app-dropzone (fileSelected)="onFile($event)" />
+
+@if (uploading()) {
+  <p class="muted" role="status">Wgrywanie…</p>
+}
+
+@if (files().length === 0) {
+  <app-empty-state
+    title="Nie ma jeszcze żadnego zestawienia"
+    message="Upuść CSV z historią transakcji albo z budżetu. W następnym kroku zmapujesz kolumny."
+  />
+} @else {
+  <div class="cards">
+    @for (file of files(); track file.id) {
+      <a class="card" [routerLink]="['/files', file.id]">
+        <span class="badge" [attr.data-status]="file.status">{{ file.status }}</span>
+        <h2>{{ file.display_name }}</h2>
+        <p>{{ file.original_filename }}</p>
+        <p class="muted">
+          {{ file.row_count }} wierszy · {{ file.uploaded_at | date: 'dd.MM.yyyy HH:mm' }}
+        </p>
+      </a>
+    }
+  </div>
+}

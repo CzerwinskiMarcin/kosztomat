@@ -1,0 +1,129 @@
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.4rem;
+}
+
+p {
+  margin: 0;
+  color: var(--kz-muted);
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.metrics article {
+  padding: 1rem;
+  border-radius: 16px;
+  background: var(--kz-surface);
+  border: 1px solid var(--kz-border);
+}
+
+.metrics span {
+  display: block;
+  color: var(--kz-muted);
+  font-size: 0.85rem;
+}
+
+.metrics strong {
+  font-size: 1.8rem;
+  color: #6ee7b7;
+}
+
+.probable strong {
+  color: #fbbf24;
+}
+
+.only-a strong,
+.only-b strong {
+  color: #fca5a5;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 16px;
+  background: var(--kz-surface);
+  border: 1px solid var(--kz-border);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, #34d399 22%, transparent);
+  color: #6ee7b7;
+  font-size: 0.8rem;
+}
+
+.pair[data-kind='probable'] .badge {
+  background: color-mix(in srgb, #fbbf24 22%, transparent);
+  color: #fcd34d;
+}
+
+.pair[data-kind='unmatched_a'] .badge,
+.pair[data-kind='unmatched_b'] .badge {
+  background: color-mix(in srgb, #f87171 22%, transparent);
+  color: #fca5a5;
+}
+
+.amount strong {
+  display: block;
+  margin: 0.35rem 0;
+}
+
+.amount em {
+  color: var(--kz-muted);
+  font-style: normal;
+}
+
+.sides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.sides small {
+  color: var(--kz-accent);
+}
+
+.missing {
+  color: var(--kz-muted);
+}
+
+.muted {
+  color: var(--kz-muted);
+}

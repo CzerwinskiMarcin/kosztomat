@@ -1,0 +1,75 @@
+<section class="page-head">
+  <h1>Profile źródeł</h1>
+  <p>Szablony mapowania kolumn dla banku albo budżetu — używane przy każdym kolejnym eksporcie.</p>
+</section>
+
+<section class="layout">
+  <form class="panel" (submit)="$event.preventDefault(); save()">
+    <h2>{{ editingId() ? 'Edycja profilu' : 'Nowy profil' }}</h2>
+    <mat-form-field appearance="outline">
+      <mat-label>Nazwa</mat-label>
+      <input matInput [(ngModel)]="name" name="name" required />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Separator</mat-label>
+      <mat-select [(ngModel)]="delimiter" name="delimiter">
+        <mat-option value=";">średnik</mat-option>
+        <mat-option value=",">przecinek</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Format daty</mat-label>
+      <input matInput [(ngModel)]="dateFormat" name="dateFormat" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Kolumna daty</mat-label>
+      <input matInput [(ngModel)]="dateColumn" name="dateColumn" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Kolumna kwoty</mat-label>
+      <input matInput [(ngModel)]="amountColumn" name="amountColumn" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Kolumna opisu</mat-label>
+      <input matInput [(ngModel)]="descriptionColumn" name="descriptionColumn" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Znak kwoty</mat-label>
+      <mat-select [(ngModel)]="amountMode" name="amountMode">
+        <mat-option value="signed">ze znakiem</mat-option>
+        <mat-option value="absolute">bezwzględna</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div class="actions">
+      <button mat-flat-button color="primary" type="submit">Zapisz</button>
+      @if (editingId()) {
+        <button mat-button type="button" (click)="resetForm()">Anuluj</button>
+      }
+    </div>
+  </form>
+
+  <div class="list">
+    @if (profiles().length === 0) {
+      <app-empty-state
+        title="Brak profili"
+        message="Dodaj szablon, jeśli często importujesz ten sam format CSV."
+      />
+    } @else {
+      @for (profile of profiles(); track profile.id) {
+        <article class="panel">
+          <h3>{{ profile.name }}</h3>
+          <p>
+            {{ profile.delimiter === ';' ? 'średnik' : 'przecinek' }} ·
+            {{ profile.date_format }} ·
+            {{ profile.column_mapping.booking_date }} /
+            {{ profile.column_mapping.amount }}
+          </p>
+          <div class="actions">
+            <button mat-button type="button" (click)="edit(profile)">Edytuj</button>
+            <button mat-button color="warn" type="button" (click)="remove(profile)">Usuń</button>
+          </div>
+        </article>
+      }
+    }
+  </div>
+</section>

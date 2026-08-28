@@ -1,0 +1,61 @@
+.page-head {
+  margin-bottom: 1.25rem;
+}
+
+h1 {
+  margin: 0 0 0.35rem;
+}
+
+p {
+  color: var(--kz-muted);
+  margin: 0;
+}
+
+.muted {
+  color: var(--kz-muted);
+}
+
+app-dropzone {
+  display: block;
+  margin-bottom: 1.5rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  display: block;
+  padding: 1.1rem;
+  border-radius: 16px;
+  background: var(--kz-surface);
+  border: 1px solid var(--kz-border);
+  color: inherit;
+  text-decoration: none;
+}
+
+.card h2 {
+  margin: 0.6rem 0 0.25rem;
+  font-size: 1.05rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  background: var(--kz-accent-dim);
+  color: var(--kz-accent);
+}
+
+.badge[data-status='imported'] {
+  background: color-mix(in srgb, #34d399 20%, transparent);
+  color: #6ee7b7;
+}
+
+.badge[data-status='failed'] {
+  background: color-mix(in srgb, #f87171 20%, transparent);
+  color: #fca5a5;
+}

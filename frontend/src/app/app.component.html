@@ -1,0 +1,14 @@
+<div class="shell">
+  <aside>
+    <a routerLink="/" class="brand">Kosztomator</a>
+    <nav>
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Pulpit</a>
+      <a routerLink="/files" routerLinkActive="active">Pliki</a>
+      <a routerLink="/compare" routerLinkActive="active">Porównaj</a>
+      <a routerLink="/profiles" routerLinkActive="active">Profile</a>
+    </nav>
+  </aside>
+  <main>
+    <router-outlet />
+  </main>
+</div>

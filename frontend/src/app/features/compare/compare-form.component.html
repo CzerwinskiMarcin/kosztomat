@@ -1,0 +1,55 @@
+<section class="page-head">
+  <h1>Porównaj dwa pliki</h1>
+  <p>Algorytm najpierw łączy identyczną kwotę i datę (100%), potem tę samą kwotę w oknie dni (80%).</p>
+</section>
+
+@if (files().length < 2) {
+  <app-empty-state
+    title="Potrzebujesz dwóch zaimportowanych plików"
+    message="Wgraj eksport banku i budżetu, zmapuj kolumny i dopiero wtedy wróć tutaj."
+  >
+    <a mat-flat-button color="primary" routerLink="/files">Przejdź do plików</a>
+  </app-empty-state>
+} @else {
+  <form class="panel" (submit)="$event.preventDefault(); run()">
+    <div class="grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Plik A</mat-label>
+        <mat-select [(ngModel)]="fileAId" name="fileA">
+          @for (file of files(); track file.id) {
+            <mat-option [value]="file.id">{{ file.display_name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Plik B</mat-label>
+        <mat-select [(ngModel)]="fileBId" name="fileB">
+          @for (file of files(); track file.id) {
+            <mat-option [value]="file.id">{{ file.display_name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Tolerancja daty (dni)</mat-label>
+        <input matInput type="number" min="0" [(ngModel)]="tolerance" name="tolerance" />
+      </mat-form-field>
+    </div>
+    <button mat-flat-button color="primary" type="submit" [disabled]="running()">
+      {{ running() ? 'Porównywanie…' : 'Porównaj' }}
+    </button>
+  </form>
+}
+
+@if (history().length) {
+  <h2>Historia</h2>
+  <ul class="history">
+    @for (item of history(); track item.id) {
+      <li>
+        <a [routerLink]="['/compare', item.id]">
+          {{ item.file_a.display_name }} ↔ {{ item.file_b.display_name }}
+          <span>100%: {{ item.summary.exact }} · 80%: {{ item.summary.probable }}</span>
+        </a>
+      </li>
+    }
+  </ul>
+}

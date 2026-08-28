@@ -1,0 +1,73 @@
+<section class="hero">
+  <div>
+    <p class="eyebrow">Kosztomator</p>
+    <h1>Porównaj budżet z historią bankową</h1>
+    <p class="lead">
+      Wgraj dwa CSV, zmapuj kolumny i zobacz, które wpisy się zgadzają, które są prawie pewne,
+      a których brakuje w jednym z zestawień.
+    </p>
+    <div class="cta">
+      <a mat-flat-button color="primary" routerLink="/files">Wgraj plik</a>
+      <a mat-stroked-button routerLink="/compare">Porównaj</a>
+    </div>
+  </div>
+</section>
+
+<div class="grid">
+  <article class="panel">
+    <header>
+      <h2>Ostatnie pliki</h2>
+      <a routerLink="/files">Wszystkie</a>
+    </header>
+    @if (loading()) {
+      <p class="muted">Ładowanie…</p>
+    } @else if (files().length === 0) {
+      <app-empty-state
+        title="Brak plików"
+        message="Zacznij od wgrania eksportu z banku albo z budżetu domowego."
+      >
+        <a mat-flat-button color="primary" routerLink="/files">Wgraj pierwszy plik</a>
+      </app-empty-state>
+    } @else {
+      <ul>
+        @for (file of files(); track file.id) {
+          <li>
+            <a [routerLink]="['/files', file.id]">
+              <strong>{{ file.display_name }}</strong>
+              <span>{{ file.status }} · {{ file.row_count }} wierszy</span>
+            </a>
+          </li>
+        }
+      </ul>
+    }
+  </article>
+
+  <article class="panel">
+    <header>
+      <h2>Ostatnie porównania</h2>
+      <a routerLink="/compare">Nowe</a>
+    </header>
+    @if (loading()) {
+      <p class="muted">Ładowanie…</p>
+    } @else if (comparisons().length === 0) {
+      <app-empty-state
+        title="Jeszcze nic nie porównano"
+        message="Gdy dwa pliki będą zaimportowane, możesz je zestawić obok siebie."
+      />
+    } @else {
+      <ul>
+        @for (item of comparisons(); track item.id) {
+          <li>
+            <a [routerLink]="['/compare', item.id]">
+              <strong>{{ item.file_a.display_name }} ↔ {{ item.file_b.display_name }}</strong>
+              <span>
+                100%: {{ item.summary.exact }} · 80%: {{ item.summary.probable }} ·
+                braki: {{ item.summary.unmatched_a + item.summary.unmatched_b }}
+              </span>
+            </a>
+          </li>
+        }
+      </ul>
+    }
+  </article>
+</div>

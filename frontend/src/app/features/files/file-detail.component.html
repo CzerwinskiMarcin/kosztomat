@@ -1,0 +1,172 @@
+@if (file(); as current) {
+  <section class="page-head">
+    <div>
+      <a routerLink="/files">← Pliki</a>
+      <h1>{{ current.display_name }}</h1>
+      <p>{{ current.original_filename }} · {{ current.status }} · {{ current.row_count }} wierszy</p>
+    </div>
+    <div class="actions">
+      @if (!wizardMode() && current.status === 'imported') {
+        <button mat-stroked-button type="button" (click)="reimport()">Importuj ponownie</button>
+      }
+      <button mat-stroked-button color="warn" type="button" (click)="deleteFile()">Usuń</button>
+    </div>
+  </section>
+
+  @if (wizardMode()) {
+    <section class="wizard panel">
+      <h2>1. Źródło</h2>
+      <mat-form-field appearance="outline">
+        <mat-label>Profil importu</mat-label>
+        <mat-select [(ngModel)]="selectedProfileId" (selectionChange)="onProfileChange()">
+          <mat-option value="new">Nowy (ustaw ręcznie)</mat-option>
+          @for (profile of profiles(); track profile.id) {
+            <mat-option [value]="profile.id">{{ profile.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <h2>2. Podgląd i mapowanie</h2>
+      <div class="grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Kodowanie</mat-label>
+          <input matInput [(ngModel)]="encoding" (change)="loadPreview()" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Separator</mat-label>
+          <mat-select [(ngModel)]="delimiter" (selectionChange)="loadPreview()">
+            <mat-option value=";">średnik (;)</mat-option>
+            <mat-option value=",">przecinek (,)</mat-option>
+            <mat-option value="	">tabulator</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Pomiń wiersze</mat-label>
+          <input matInput type="number" [(ngModel)]="skipRows" (change)="loadPreview()" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Format daty</mat-label>
+          <input matInput [(ngModel)]="dateFormat" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Separator dziesiętny</mat-label>
+          <mat-select [(ngModel)]="decimalSeparator">
+            <mat-option value=",">przecinek</mat-option>
+            <mat-option value=".">kropka</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Znak kwoty</mat-label>
+          <mat-select [(ngModel)]="amountMode">
+            <mat-option value="signed">ze znakiem (bank)</mat-option>
+            <mat-option value="absolute">wartość bezwzględna (budżet)</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <mat-checkbox [(ngModel)]="hasHeader" (change)="loadPreview()">Pierwszy wiersz to nagłówek</mat-checkbox>
+
+      @if (preview(); as table) {
+        <p class="muted">
+          Wykryto {{ table.detected_encoding }} / „{{ table.detected_delimiter }}”. Pokazuję
+          {{ table.rows.length }} z {{ table.row_count }} wierszy.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                @for (header of table.headers; track header) {
+                  <th>{{ header }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of table.rows; track $index) {
+                <tr>
+                  @for (cell of row; track $index) {
+                    <td>{{ cell }}</td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Kolumna daty</mat-label>
+            <mat-select [(ngModel)]="dateColumn">
+              @for (header of table.headers; track header) {
+                <mat-option [value]="header">{{ header }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Kolumna kwoty</mat-label>
+            <mat-select [(ngModel)]="amountColumn">
+              @for (header of table.headers; track header) {
+                <mat-option [value]="header">{{ header }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Kolumna opisu (opcjonalnie)</mat-label>
+            <mat-select [(ngModel)]="descriptionColumn">
+              <mat-option value="">—</mat-option>
+              @for (header of table.headers; track header) {
+                <mat-option [value]="header">{{ header }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      }
+
+      @if (selectedProfileId === 'new') {
+        <mat-form-field appearance="outline" class="wide">
+          <mat-label>Zapisz jako nowy profil (opcjonalnie)</mat-label>
+          <input matInput [(ngModel)]="saveProfileName" />
+        </mat-form-field>
+      }
+
+      <h2>3. Import</h2>
+      <button mat-flat-button color="primary" type="button" (click)="importNow()" [disabled]="importing()">
+        {{ importing() ? 'Importowanie…' : 'Zaimportuj transakcje' }}
+      </button>
+
+      @if (errors().length) {
+        <ul class="errors" role="status">
+          @for (error of errors(); track error.row_index) {
+            <li>Wiersz {{ error.row_index + 1 }}: {{ error.message }}</li>
+          }
+        </ul>
+      }
+    </section>
+  } @else {
+    <section class="panel">
+      <h2>Transakcje</h2>
+      @if (transactions().length === 0) {
+        <p class="muted">Brak wierszy po imporcie.</p>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Kwota</th>
+                <th>Opis</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of transactions(); track trackByTx($index, row)) {
+                <tr>
+                  <td>{{ row.booking_date | datePl }}</td>
+                  <td>{{ row.amount | pln }}</td>
+                  <td>{{ row.description || '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+}

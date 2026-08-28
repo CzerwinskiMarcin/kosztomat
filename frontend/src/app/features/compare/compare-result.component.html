@@ -1,0 +1,84 @@
+@if (comparison(); as current) {
+  <section class="page-head">
+    <div>
+      <h1>{{ current.file_a.display_name }} ↔ {{ current.file_b.display_name }}</h1>
+      <p>Tolerancja daty: {{ current.date_tolerance_days }} dni</p>
+    </div>
+    <button mat-stroked-button type="button" (click)="rerun()" [disabled]="loading()">
+      Porównaj ponownie
+    </button>
+  </section>
+
+  <div class="metrics" role="status">
+    <article>
+      <span>Dopasowane 100%</span>
+      <strong>{{ current.summary.exact }}</strong>
+    </article>
+    <article class="probable">
+      <span>Prawdopodobne 80%</span>
+      <strong>{{ current.summary.probable }}</strong>
+    </article>
+    <article class="only-a">
+      <span>Tylko plik A</span>
+      <strong>{{ current.summary.unmatched_a }}</strong>
+    </article>
+    <article class="only-b">
+      <span>Tylko plik B</span>
+      <strong>{{ current.summary.unmatched_b }}</strong>
+    </article>
+  </div>
+
+  <div class="toolbar">
+    <mat-button-toggle-group [value]="kind()" (change)="setKind($event.value)">
+      <mat-button-toggle value="exact">Dopasowane 100%</mat-button-toggle>
+      <mat-button-toggle value="probable">Prawdopodobne 80%</mat-button-toggle>
+      <mat-button-toggle value="unmatched_a">Tylko plik A</mat-button-toggle>
+      <mat-button-toggle value="unmatched_b">Tylko plik B</mat-button-toggle>
+    </mat-button-toggle-group>
+    <mat-form-field appearance="outline">
+      <mat-label>Szukaj w opisie</mat-label>
+      <input matInput [ngModel]="query()" (ngModelChange)="query.set($event)" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Kwota</mat-label>
+      <input matInput [ngModel]="amountFilter()" (ngModelChange)="amountFilter.set($event)" />
+    </mat-form-field>
+  </div>
+
+  <div class="list">
+    @for (row of visible(); track trackByMatch($index, row)) {
+      <article class="pair" [attr.data-kind]="row.kind">
+        <div class="amount">
+          <span class="badge">{{ row.confidence }}%</span>
+          <strong>{{ row.amount | pln }}</strong>
+          @if (row.date_delta_days !== null && row.kind === 'probable') {
+            <em>Δ {{ row.date_delta_days }} dni</em>
+          }
+        </div>
+        <div class="sides">
+          @if (row.a) {
+            <div>
+              <small>A · {{ current.file_a.display_name }}</small>
+              <p>{{ row.a.booking_date | datePl }}</p>
+              <p>{{ row.a.description || '—' }}</p>
+            </div>
+          }
+          @if (row.b) {
+            <div>
+              <small>B · {{ current.file_b.display_name }}</small>
+              <p>{{ row.b.booking_date | datePl }}</p>
+              <p>{{ row.b.description || '—' }}</p>
+            </div>
+          }
+          @if (!row.a || !row.b) {
+            <div class="missing">
+              <small>Brak odpowiednika w drugim pliku</small>
+            </div>
+          }
+        </div>
+      </article>
+    } @empty {
+      <p class="muted">Brak wierszy w tej grupie.</p>
+    }
+  </div>
+}
